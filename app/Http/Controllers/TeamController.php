@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Team;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class TeamController extends Controller
 {
@@ -44,5 +45,32 @@ class TeamController extends Controller
         ]);
 
         return back()->with('success', 'Profil frissítve.');
+    }
+
+    public function showChangePassword()
+    {
+        $team = Auth::guard('team')->user();
+        return view('team.change-password', compact('team'));
+    }
+
+    public function changePassword(Request $request)
+    {
+        $team = Auth::guard('team')->user();
+
+        $request->validate([
+            'current_password' => 'required',
+            'password'         => 'required|min:6|confirmed',
+        ], [
+            'password.min'       => 'Az új jelszónak legalább 6 karakter hosszúnak kell lennie.',
+            'password.confirmed' => 'A két jelszó nem egyezik.',
+        ]);
+
+        if (!Hash::check($request->current_password, $team->password)) {
+            return back()->withErrors(['current_password' => 'A jelenlegi jelszó helytelen.']);
+        }
+
+        $team->update(['password' => Hash::make($request->password)]);
+
+        return back()->with('success', 'Jelszó sikeresen megváltoztatva!');
     }
 }

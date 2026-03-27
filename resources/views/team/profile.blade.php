@@ -25,8 +25,12 @@
             </div>
 
             <button type="submit" class="btn btn-primary">Mentés</button>
-            <a href="{{ route('team.dashboard') }}" class="btn btn-secondary" style="margin-left:0.5rem;">Vissza</a>
+            <a href="{{ route('team.dashboard') }}" class="btn btn-secondary">Vissza</a>
         </form>
+
+        <hr class="divider">
+        <p style="font-size:0.9rem; color:#888; margin-bottom:0.75rem;">Jelszó módosítása</p>
+        <a href="{{ route('team.password.change.form') }}" class="btn btn-secondary">🔒 Jelszóváltoztatás</a>
     </div>
 </div>
 @endsection

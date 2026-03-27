@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\EventRegistrationConfirmation;
 use App\Models\Event;
 use App\Models\EventRegistration;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class EventController extends Controller
 {
@@ -58,13 +60,19 @@ class EventController extends Controller
                 return back()->with('error', 'A csapatod már nevezve van erre az eseményre.');
             }
 
-            EventRegistration::create([
+            $registration = EventRegistration::create([
                 'event_id' => $event->id,
                 'team_id' => $team->id,
                 'status' => 'confirmed',
             ]);
 
-            return redirect()->route('events.show', $event)->with('success', 'Sikeres nevezés!');
+            try {
+                Mail::to($team->email)->send(new EventRegistrationConfirmation($registration->load('event')));
+            } catch (\Exception $e) {
+                // Email küldési hiba nem akadályozza a nevezést
+            }
+
+            return redirect()->route('events.show', $event)->with('success', 'Sikeres nevezés! Visszaigazoló emailt küldtünk.');
         }
 
         // Vendég nevezés
@@ -85,7 +93,7 @@ class EventController extends Controller
             return back()->withErrors(['guest_team_name' => 'Ez a csapatnév már foglalt ennél az eseménynél.'])->withInput();
         }
 
-        EventRegistration::create([
+        $registration = EventRegistration::create([
             'event_id' => $event->id,
             'guest_team_name' => $request->guest_team_name,
             'guest_contact_name' => $request->guest_contact_name,
@@ -94,7 +102,13 @@ class EventController extends Controller
             'status' => 'confirmed',
         ]);
 
-        return redirect()->route('events.show', $event)->with('success', 'Sikeres nevezés! Hamarosan felvesszük veled a kapcsolatot.');
+        try {
+            Mail::to($request->guest_contact_email)->send(new EventRegistrationConfirmation($registration->load('event')));
+        } catch (\Exception $e) {
+            // Email küldési hiba nem akadályozza a nevezést
+        }
+
+        return redirect()->route('events.show', $event)->with('success', 'Sikeres nevezés! Visszaigazoló emailt küldtünk.');
     }
 
     public function cancelRegistration(Event $event)

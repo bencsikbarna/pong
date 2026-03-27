@@ -163,7 +163,7 @@
                 {{ $match->awayRegistration->team_name ?? '?' }}
             </span>
 
-            <form method="POST" action="{{ route('admin.matches.result', [$event, $match]) }}" class="score-form">
+            <form method="POST" action="{{ route('admin.matches.result', [$event, $match->id]) }}" class="score-form">
                 @csrf
                 <input type="number" name="home_score" value="{{ $match->home_score }}" min="0" max="10" placeholder="0" style="width:3.5rem;">
                 <span class="text-muted">-</span>

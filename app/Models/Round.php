@@ -18,7 +18,7 @@ class Round extends Model
 
     public function matches()
     {
-        return $this->hasMany(\App\Models\Match::class);
+        return $this->hasMany(\App\Models\GameMatch::class);
     }
 
     public function isFullyPlayed(): bool

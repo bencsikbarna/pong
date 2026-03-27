@@ -260,4 +260,14 @@ CREATE TABLE IF NOT EXISTS `migrations` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ------------------------------------------------------------
+-- team_password_resets (csapat jelszó-visszaállítás tokenek)
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `team_password_resets` (
+    `email`      VARCHAR(255) NOT NULL,
+    `token`      VARCHAR(255) NOT NULL,
+    `created_at` TIMESTAMP    NULL DEFAULT NULL,
+    INDEX `team_password_resets_email_index` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 SET FOREIGN_KEY_CHECKS = 1;

@@ -7,7 +7,7 @@ use App\Models\Event;
 use App\Models\Group;
 use App\Models\GroupTeam;
 use App\Models\Round;
-use App\Models\Match as PongMatch;
+use App\Models\GameMatch;
 use Illuminate\Http\Request;
 
 class AdminGroupController extends Controller
@@ -141,7 +141,7 @@ class AdminGroupController extends Controller
                     $homeGroupTeam = GroupTeam::find($homeId);
                     $awayGroupTeam = GroupTeam::find($awayId);
 
-                    PongMatch::create([
+                    GameMatch::create([
                         'round_id' => $round->id,
                         'home_registration_id' => $homeGroupTeam->registration_id,
                         'away_registration_id' => $awayGroupTeam->registration_id,

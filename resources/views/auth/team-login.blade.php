@@ -33,6 +33,9 @@
             Még nincs fiókotok? <a href="{{ route('team.register') }}" class="text-orange">Regisztráció</a>
         </p>
         <p class="text-center text-muted mt-1" style="font-size:0.88rem;">
+            <a href="{{ route('team.password.forgot.form') }}" style="color:#888;">Elfelejtett jelszó?</a>
+        </p>
+        <p class="text-center text-muted mt-1" style="font-size:0.88rem;">
             <a href="{{ route('admin.login') }}" style="color:#9b59b6">Admin bejelentkezés →</a>
         </p>
     </div>

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\TeamAuthController;
 use App\Http\Controllers\Auth\AdminAuthController;
+use App\Http\Controllers\Auth\TeamPasswordResetController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\Admin\AdminEventController;
@@ -37,11 +38,21 @@ Route::middleware('guest:team')->group(function () {
 
 Route::post('/kijelentkezes', [TeamAuthController::class, 'logout'])->name('team.logout');
 
+// Elfelejtett jelszó (vendég számára)
+Route::middleware('guest:team')->group(function () {
+    Route::get('/elfelejtett-jelszo', [TeamPasswordResetController::class, 'showForgotForm'])->name('team.password.forgot.form');
+    Route::post('/elfelejtett-jelszo', [TeamPasswordResetController::class, 'sendResetLink'])->name('team.password.forgot');
+    Route::get('/jelszo-visszaallitas/{token}', [TeamPasswordResetController::class, 'showResetForm'])->name('team.password.reset.form');
+    Route::post('/jelszo-visszaallitas', [TeamPasswordResetController::class, 'resetPassword'])->name('team.password.reset');
+});
+
 // Csapat profil (bejelentkezett csapatoknak)
 Route::middleware('team.auth')->group(function () {
     Route::get('/csapat/iranyito', [TeamController::class, 'dashboard'])->name('team.dashboard');
     Route::get('/csapat/profil', [TeamController::class, 'profile'])->name('team.profile');
     Route::post('/csapat/profil', [TeamController::class, 'updateProfile'])->name('team.profile.update');
+    Route::get('/csapat/jelszo', [TeamController::class, 'showChangePassword'])->name('team.password.change.form');
+    Route::post('/csapat/jelszo', [TeamController::class, 'changePassword'])->name('team.password.change');
 });
 
 // ============================================================
@@ -75,7 +86,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/esemenyek/{event}/tovabbjutok', [AdminGroupController::class, 'advanceTeams'])->name('groups.advance');
 
         // Meccs eredmények
-        Route::post('/esemenyek/{event}/meccsek/{match}/eredmeny', [AdminMatchController::class, 'updateResult'])->name('matches.result');
+        Route::post('/esemenyek/{event}/meccsek/{gameMatch}/eredmeny', [AdminMatchController::class, 'updateResult'])->name('matches.result');
 
         // Knockout eredmények
         Route::post('/esemenyek/{event}/kieseses/{knockoutMatch}/eredmeny', [AdminKnockoutController::class, 'updateResult'])->name('knockout.result');
