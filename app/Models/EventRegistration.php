@@ -12,7 +12,7 @@ class EventRegistration extends Model
     protected $fillable = [
         'event_id', 'team_id',
         'guest_team_name', 'guest_contact_name', 'guest_contact_email', 'guest_contact_phone',
-        'status',
+        'status', 'drink_preference',
     ];
 
     public function event()

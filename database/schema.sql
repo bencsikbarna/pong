@@ -79,6 +79,8 @@ CREATE TABLE IF NOT EXISTS `event_registrations` (
     `guest_contact_phone`   VARCHAR(50)     NULL DEFAULT NULL,
     `status`                VARCHAR(20)     NOT NULL DEFAULT 'confirmed'
                             COMMENT 'pending | confirmed | rejected',
+    `drink_preference`      VARCHAR(20)     NOT NULL DEFAULT 'sor'
+                            COMMENT 'sor | froccs',
     `created_at`            TIMESTAMP       NULL DEFAULT NULL,
     `updated_at`            TIMESTAMP       NULL DEFAULT NULL,
     PRIMARY KEY (`id`),

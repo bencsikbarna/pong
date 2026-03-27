@@ -58,6 +58,7 @@
                     <th>#</th>
                     <th>Csapat</th>
                     <th>Típus</th>
+                    <th>Ital</th>
                     <th>Kapcsolattartó</th>
                     @if(in_array($event->status, ['registration_open', 'registration_closed']))
                         <th></th>
@@ -74,6 +75,13 @@
                             <span class="badge badge-blue">Regisztrált</span>
                         @else
                             <span class="badge badge-gray">Vendég</span>
+                        @endif
+                    </td>
+                    <td style="font-size:0.9rem;">
+                        @if($reg->drink_preference === 'froccs')
+                            🥂 Fröccs
+                        @else
+                            🍺 Sör
                         @endif
                     </td>
                     <td class="text-muted" style="font-size:0.85rem;">

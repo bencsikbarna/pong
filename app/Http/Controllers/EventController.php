@@ -60,10 +60,13 @@ class EventController extends Controller
                 return back()->with('error', 'A csapatod már nevezve van erre az eseményre.');
             }
 
+            $drinkPref = in_array($request->drink_preference, ['sor', 'froccs']) ? $request->drink_preference : 'sor';
+
             $registration = EventRegistration::create([
                 'event_id' => $event->id,
                 'team_id' => $team->id,
                 'status' => 'confirmed',
+                'drink_preference' => $drinkPref,
             ]);
 
             try {
@@ -81,6 +84,7 @@ class EventController extends Controller
             'guest_contact_name' => 'required|string|max:255',
             'guest_contact_email' => 'required|email|max:255',
             'guest_contact_phone' => 'nullable|string|max:50',
+            'drink_preference' => 'nullable|in:sor,froccs',
         ], [
             'guest_team_name.required' => 'A csapat neve kötelező.',
             'guest_contact_name.required' => 'A kapcsolattartó neve kötelező.',
@@ -93,6 +97,8 @@ class EventController extends Controller
             return back()->withErrors(['guest_team_name' => 'Ez a csapatnév már foglalt ennél az eseménynél.'])->withInput();
         }
 
+        $drinkPref = in_array($request->drink_preference, ['sor', 'froccs']) ? $request->drink_preference : 'sor';
+
         $registration = EventRegistration::create([
             'event_id' => $event->id,
             'guest_team_name' => $request->guest_team_name,
@@ -100,6 +106,7 @@ class EventController extends Controller
             'guest_contact_email' => $request->guest_contact_email,
             'guest_contact_phone' => $request->guest_contact_phone,
             'status' => 'confirmed',
+            'drink_preference' => $drinkPref,
         ]);
 
         try {

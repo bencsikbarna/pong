@@ -63,6 +63,19 @@
                     <p class="text-muted mb-2" style="font-size:0.9rem;">Bejelentkezve mint: <strong class="text-orange">{{ Auth::guard('team')->user()->name }}</strong></p>
                     <form method="POST" action="{{ route('events.register', $event) }}">
                         @csrf
+                        <div class="form-group" style="margin-bottom:0.75rem;">
+                            <label style="font-size:0.88rem;">Mit isztok? 🍺</label>
+                            <div style="display:flex; gap:1rem; margin-top:0.3rem;">
+                                <label style="display:flex; align-items:center; gap:0.4rem; cursor:pointer; font-weight:normal; font-size:0.9rem;">
+                                    <input type="radio" name="drink_preference" value="sor" checked style="width:auto;">
+                                    🍺 Sör
+                                </label>
+                                <label style="display:flex; align-items:center; gap:0.4rem; cursor:pointer; font-weight:normal; font-size:0.9rem;">
+                                    <input type="radio" name="drink_preference" value="froccs" style="width:auto;">
+                                    🥂 Fröccs
+                                </label>
+                            </div>
+                        </div>
                         <button type="submit" class="btn btn-primary">🏆 Nevezés!</button>
                     </form>
                 @endif
