@@ -73,7 +73,8 @@ class AdminGroupController extends Controller
             }
 
             // Fordulók generálása round-robin módszerrel
-            $this->generateRounds($group, $chunk->values(), $tablesCount);
+            $groupTeams = $group->groupTeams()->get();
+            $this->generateRounds($group, $groupTeams, $tablesCount);
         }
 
         $event->update([
