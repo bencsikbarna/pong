@@ -18,9 +18,18 @@ class TeamController extends Controller
 
     public function stats()
     {
-        $teams = Team::orderByDesc('total_wins')
-            ->orderByDesc('total_cups_scored')
-            ->get();
+        $teams = Team::with(['registrations.groupTeam'])->get()->map(function ($team) {
+            $groupTeams = $team->registrations->map->groupTeam->filter();
+            $team->dyn_events       = $team->registrations->count();
+            $team->dyn_wins         = $groupTeams->sum('wins');
+            $team->dyn_losses       = $groupTeams->sum('losses');
+            $team->dyn_draws        = $groupTeams->sum('draws');
+            $team->dyn_cups_scored  = $groupTeams->sum('cups_scored');
+            $team->dyn_cups_conceded = $groupTeams->sum('cups_conceded');
+            $team->dyn_cup_diff     = $team->dyn_cups_scored - $team->dyn_cups_conceded;
+            return $team;
+        })->sortByDesc('dyn_wins')->sortByDesc('dyn_cups_scored')->values();
+
         return view('team.stats', compact('teams'));
     }
 

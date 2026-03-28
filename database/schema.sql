@@ -143,6 +143,7 @@ CREATE TABLE IF NOT EXISTS `rounds` (
 CREATE TABLE IF NOT EXISTS `matches` (
     `id`                   BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     `round_id`             BIGINT UNSIGNED NOT NULL,
+    `table_number`         INT             NOT NULL DEFAULT 1 COMMENT 'Asztal száma',
     `home_registration_id` BIGINT UNSIGNED NOT NULL,
     `away_registration_id` BIGINT UNSIGNED NOT NULL,
     `home_score`           INT             NULL DEFAULT NULL COMMENT '0-10',
@@ -173,6 +174,7 @@ CREATE TABLE IF NOT EXISTS `knockout_matches` (
     `away_score`             INT             NULL DEFAULT NULL,
     `winner_registration_id` BIGINT UNSIGNED NULL DEFAULT NULL,
     `is_played`              TINYINT(1)      NOT NULL DEFAULT 0,
+    `is_bronze`              TINYINT(1)      NOT NULL DEFAULT 0 COMMENT 'Bronz mérkőzés (3. helyért)',
     `created_at`             TIMESTAMP       NULL DEFAULT NULL,
     `updated_at`             TIMESTAMP       NULL DEFAULT NULL,
     PRIMARY KEY (`id`),

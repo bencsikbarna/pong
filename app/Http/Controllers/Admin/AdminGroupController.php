@@ -137,15 +137,16 @@ class AdminGroupController extends Controller
                     'round_number' => $roundNumber++,
                 ]);
 
-                foreach ($subMatchSet as [$homeId, $awayId]) {
+                foreach ($subMatchSet as $tableIdx => [$homeId, $awayId]) {
                     // homeId és awayId itt GroupTeam id-k
                     $homeGroupTeam = GroupTeam::find($homeId);
                     $awayGroupTeam = GroupTeam::find($awayId);
 
                     GameMatch::create([
-                        'round_id' => $round->id,
-                        'home_registration_id' => $homeGroupTeam->registration_id,
-                        'away_registration_id' => $awayGroupTeam->registration_id,
+                        'round_id'              => $round->id,
+                        'table_number'          => $tableIdx + 1,
+                        'home_registration_id'  => $homeGroupTeam->registration_id,
+                        'away_registration_id'  => $awayGroupTeam->registration_id,
                     ]);
                 }
             }
@@ -259,33 +260,45 @@ class AdminGroupController extends Controller
             ]);
         }
 
-        // Generáljuk a következő köröket is (üres helyekkel)
+        // Generáljuk a közbülső köröket (elődöntőtől felfelé, döntő nélkül)
+        // A loop csak round=4-ig megy, a döntőt külön kezeljük
         $currentRound = $bracketSize;
-        while ($currentRound > 2) {
+        while ($currentRound > 4) {
             $nextRound = $currentRound / 2;
             $matchesInRound = $nextRound / 2;
             for ($i = 1; $i <= $matchesInRound; $i++) {
                 \App\Models\KnockoutMatch::create([
-                    'event_id' => $event->id,
-                    'round' => $nextRound,
-                    'match_number' => $i,
-                    'home_registration_id' => null,
-                    'away_registration_id' => null,
-                    'is_played' => false,
+                    'event_id'              => $event->id,
+                    'round'                 => $nextRound,
+                    'match_number'          => $i,
+                    'home_registration_id'  => null,
+                    'away_registration_id'  => null,
+                    'is_played'             => false,
                 ]);
             }
             $currentRound = $nextRound;
         }
 
-        // Döntő (ha még nincs)
-        if ($bracketSize > 2) {
+        // Döntő
+        \App\Models\KnockoutMatch::create([
+            'event_id'              => $event->id,
+            'round'                 => 2,
+            'match_number'          => 1,
+            'home_registration_id'  => null,
+            'away_registration_id'  => null,
+            'is_played'             => false,
+        ]);
+
+        // Bronz mérkőzés (3. helyért) – csak ha van elődöntő
+        if ($bracketSize >= 4) {
             \App\Models\KnockoutMatch::create([
-                'event_id' => $event->id,
-                'round' => 2,
-                'match_number' => 1,
-                'home_registration_id' => null,
-                'away_registration_id' => null,
-                'is_played' => false,
+                'event_id'              => $event->id,
+                'round'                 => 2,
+                'match_number'          => 2,
+                'is_bronze'             => true,
+                'home_registration_id'  => null,
+                'away_registration_id'  => null,
+                'is_played'             => false,
             ]);
         }
 

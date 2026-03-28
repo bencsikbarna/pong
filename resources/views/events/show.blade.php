@@ -13,6 +13,7 @@
 <div class="grid-2 mb-2">
     <div class="card">
         <div class="card-title">Esemény adatok</div>
+        <div class="table-wrap">
         <table>
             <tr>
                 <td class="text-muted" style="width:45%">Dátum</td>
@@ -41,10 +42,11 @@
             </tr>
             @endif
         </table>
+        </div>
 
         @if($event->description)
             <hr class="divider">
-            <p style="color:#999; font-size:0.9rem;">{{ $event->description }}</p>
+            <p style="color:#999; font-size:0.9rem; word-break:break-word;">{{ $event->description }}</p>
         @endif
     </div>
 
@@ -65,7 +67,7 @@
                         @csrf
                         <div class="form-group" style="margin-bottom:0.75rem;">
                             <label style="font-size:0.88rem;">Mit isztok? 🍺</label>
-                            <div style="display:flex; gap:1rem; margin-top:0.3rem;">
+                            <div style="display:flex; gap:1rem; margin-top:0.3rem; flex-wrap:wrap;">
                                 <label style="display:flex; align-items:center; gap:0.4rem; cursor:pointer; font-weight:normal; font-size:0.9rem;">
                                     <input type="radio" name="drink_preference" value="sor" checked style="width:auto;">
                                     🍺 Sör
@@ -102,6 +104,7 @@
     @if($registrations->isEmpty())
         <p class="text-muted">Még nincs nevezett csapat.</p>
     @else
+        <div class="table-wrap">
         <table>
             <thead>
                 <tr>
@@ -120,6 +123,7 @@
                 @endforeach
             </tbody>
         </table>
+        </div>
     @endif
 </div>
 
@@ -132,7 +136,8 @@
         <div class="card-title">{{ $group->name }}</div>
 
         {{-- Csoport tabella --}}
-        <table style="margin-bottom:1.5rem;">
+        <div class="table-wrap" style="margin-bottom:1.5rem;">
+        <table>
             <thead>
                 <tr>
                     <th>#</th>
@@ -166,6 +171,7 @@
                 @endforeach
             </tbody>
         </table>
+        </div>
 
         {{-- Fordulók --}}
         <div class="card-title" style="font-size:0.95rem; color:#888;">Mérkőzések</div>
@@ -173,18 +179,19 @@
         <div style="margin-bottom:1.2rem;">
             <div style="color:#888; font-size:0.85rem; margin-bottom:0.4rem;">{{ $round->round_number }}. forduló</div>
             @foreach($round->matches as $match)
-            <div style="display:flex; align-items:center; gap:0.8rem; padding:0.4rem 0; border-bottom:1px solid #1a1a30; font-size:0.9rem;">
-                <span style="flex:1; text-align:right; {{ $match->result === 'home_win' ? 'color:#f39c12;font-weight:700;' : '' }}">
+            <div style="display:flex; align-items:center; gap:0.5rem; padding:0.4rem 0; border-bottom:1px solid #1a1a30; font-size:0.88rem; flex-wrap:wrap;">
+                <span style="font-size:0.75rem; color:#555; white-space:nowrap;">🎯{{ $match->table_number ?? 1 }}</span>
+                <span style="flex:1; text-align:right; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; {{ $match->result === 'home_win' ? 'color:#f39c12;font-weight:700;' : '' }}">
                     {{ $match->homeRegistration->team_name ?? '?' }}
                 </span>
-                <span style="min-width:3rem; text-align:center; font-weight:700; color:{{ $match->is_played ? '#e0e0e0' : '#555' }}">
+                <span style="min-width:2.8rem; text-align:center; font-weight:700; color:{{ $match->is_played ? '#e0e0e0' : '#555' }}; flex-shrink:0;">
                     @if($match->is_played)
                         {{ $match->home_score }} - {{ $match->away_score }}
                     @else
                         vs
                     @endif
                 </span>
-                <span style="flex:1; {{ $match->result === 'away_win' ? 'color:#f39c12;font-weight:700;' : '' }}">
+                <span style="flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; {{ $match->result === 'away_win' ? 'color:#f39c12;font-weight:700;' : '' }}">
                     {{ $match->awayRegistration->team_name ?? '?' }}
                 </span>
             </div>

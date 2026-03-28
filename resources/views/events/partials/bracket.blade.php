@@ -2,14 +2,16 @@
     <div class="card-title">Egyenes kieséses szakasz</div>
 
     @php
-        $matchesByRound = $event->knockoutMatches->sortByDesc('round')->groupBy('round');
-        $rounds = $matchesByRound->keys()->sortDesc()->values();
+        $allMatches = $event->knockoutMatches;
+        $mainMatches = $allMatches->where('is_bronze', false)->sortByDesc('round')->groupBy('round');
+        $bronzeMatch = $allMatches->where('is_bronze', true)->first();
+        $rounds = $mainMatches->keys()->sortDesc()->values();
     @endphp
 
     <div class="bracket">
         <div class="bracket-rounds">
             @foreach($rounds as $round)
-                @php $roundMatches = $matchesByRound[$round]->sortBy('match_number'); @endphp
+                @php $roundMatches = $mainMatches[$round]->sortBy('match_number'); @endphp
                 <div class="bracket-round">
                     <div class="bracket-round-title">
                         @if($round == 2) Döntő
@@ -41,9 +43,30 @@
         </div>
     </div>
 
+    {{-- Bronz mérkőzés --}}
+    @if($bronzeMatch)
+    <div style="margin-top:1.5rem; border-top:1px solid #2a2a4a; padding-top:1rem;">
+        <div style="font-size:0.8rem; font-weight:700; color:#cd7f32; text-transform:uppercase; margin-bottom:0.6rem;">🥉 3. helyért – Bronz mérkőzés</div>
+        <div class="bracket-match" style="max-width:260px;">
+            @php
+                $bHomeWin = $bronzeMatch->is_played && $bronzeMatch->winner_registration_id == $bronzeMatch->home_registration_id;
+                $bAwayWin = $bronzeMatch->is_played && $bronzeMatch->winner_registration_id == $bronzeMatch->away_registration_id;
+            @endphp
+            <div class="bracket-team {{ $bHomeWin ? 'winner' : '' }} {{ !$bronzeMatch->home_registration_id ? 'tbd' : '' }}">
+                <span>{{ $bronzeMatch->homeRegistration?->team_name ?? 'TBD' }}</span>
+                @if($bronzeMatch->is_played)<span class="bracket-score">{{ $bronzeMatch->home_score }}</span>@endif
+            </div>
+            <div class="bracket-team {{ $bAwayWin ? 'winner' : '' }} {{ !$bronzeMatch->away_registration_id ? 'tbd' : '' }}">
+                <span>{{ $bronzeMatch->awayRegistration?->team_name ?? 'TBD' }}</span>
+                @if($bronzeMatch->is_played)<span class="bracket-score">{{ $bronzeMatch->away_score }}</span>@endif
+            </div>
+        </div>
+    </div>
+    @endif
+
     @if($event->status === 'finished')
         @php
-            $final = $event->knockoutMatches->where('round', 2)->first();
+            $final = $allMatches->where('round', 2)->where('is_bronze', false)->first();
         @endphp
         @if($final && $final->winner)
         <div class="text-center mt-3">

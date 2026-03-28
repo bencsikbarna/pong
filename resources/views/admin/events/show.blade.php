@@ -52,6 +52,7 @@
     @if($event->confirmedRegistrations->isEmpty())
         <p class="text-muted">Még nincs nevezett csapat.</p>
     @else
+        <div class="table-wrap">
         <table>
             <thead>
                 <tr>
@@ -101,6 +102,7 @@
                 @endforeach
             </tbody>
         </table>
+        </div>
     @endif
 </div>
 
@@ -113,7 +115,8 @@
     <div class="card-title">{{ $group->name }}</div>
 
     {{-- Csoport tabella --}}
-    <table style="margin-bottom:1.5rem;">
+    <div class="table-wrap" style="margin-bottom:1.5rem;">
+    <table>
         <thead>
             <tr>
                 <th>#</th>
@@ -147,6 +150,7 @@
             @endforeach
         </tbody>
     </table>
+    </div>
 
     {{-- Fordulók eredményrögzítéssel --}}
     @if($event->status === 'group_stage')
@@ -154,24 +158,27 @@
     <div style="margin-bottom:1.5rem;">
         <div style="color:#888; font-size:0.85rem; margin-bottom:0.5rem; font-weight:600;">{{ $round->round_number }}. forduló</div>
         @foreach($round->matches as $match)
-        <div style="background:#1e1e3a; border-radius:8px; padding:0.8rem 1rem; margin-bottom:0.5rem; display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
-            <span style="flex:1; text-align:right; font-weight:{{ $match->result === 'home_win' ? '700' : '400' }}; color:{{ $match->result === 'home_win' ? '#f39c12' : '#e0e0e0' }}; min-width:120px;">
+        <div style="background:#1e1e3a; border-radius:8px; padding:0.7rem 0.9rem; margin-bottom:0.5rem; display:flex; align-items:center; gap:0.7rem; flex-wrap:wrap;">
+            <span style="font-size:0.75rem; color:#f39c12; font-weight:700; background:rgba(243,156,18,0.1); border-radius:4px; padding:0.15rem 0.4rem; flex-shrink:0;">
+                🎯 {{ $match->table_number ?? 1 }}. asztal
+            </span>
+            <span style="flex:1; text-align:right; font-weight:{{ $match->result === 'home_win' ? '700' : '400' }}; color:{{ $match->result === 'home_win' ? '#f39c12' : '#e0e0e0' }}; min-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
                 {{ $match->homeRegistration->team_name ?? '?' }}
             </span>
 
             @if($match->is_played)
-                <span style="font-size:1.1rem; font-weight:700; color:#e0e0e0; min-width:3rem; text-align:center;">
+                <span style="font-size:1.05rem; font-weight:700; color:#e0e0e0; min-width:2.8rem; text-align:center; flex-shrink:0;">
                     {{ $match->home_score }} - {{ $match->away_score }}
                 </span>
             @else
-                <span style="color:#555; min-width:3rem; text-align:center;">vs</span>
+                <span style="color:#555; min-width:2.8rem; text-align:center; flex-shrink:0;">vs</span>
             @endif
 
-            <span style="flex:1; font-weight:{{ $match->result === 'away_win' ? '700' : '400' }}; color:{{ $match->result === 'away_win' ? '#f39c12' : '#e0e0e0' }}; min-width:120px;">
+            <span style="flex:1; font-weight:{{ $match->result === 'away_win' ? '700' : '400' }}; color:{{ $match->result === 'away_win' ? '#f39c12' : '#e0e0e0' }}; min-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
                 {{ $match->awayRegistration->team_name ?? '?' }}
             </span>
 
-            <form method="POST" action="{{ route('admin.matches.result', [$event, $match->id]) }}" class="score-form">
+            <form method="POST" action="{{ route('admin.matches.result', [$event, $match->id]) }}" class="score-form" style="flex-shrink:0;">
                 @csrf
                 <input type="number" name="home_score" value="{{ $match->home_score }}" min="0" max="10" placeholder="0" style="width:3.5rem;">
                 <span class="text-muted">-</span>
@@ -209,14 +216,16 @@
     <div class="card-title">Egyenes kieséses szakasz</div>
 
     @php
-        $matchesByRound = $event->knockoutMatches->sortByDesc('round')->groupBy('round');
-        $rounds = $matchesByRound->keys()->sortDesc()->values();
+        $allKO = $event->knockoutMatches;
+        $mainKO = $allKO->where('is_bronze', false)->sortByDesc('round')->groupBy('round');
+        $bronzeKO = $allKO->where('is_bronze', true)->first();
+        $koRounds = $mainKO->keys()->sortDesc()->values();
     @endphp
 
     <div class="bracket">
         <div class="bracket-rounds">
-            @foreach($rounds as $round)
-                @php $roundMatches = $matchesByRound[$round]->sortBy('match_number'); @endphp
+            @foreach($koRounds as $round)
+                @php $roundMatches = $mainKO[$round]->sortBy('match_number'); @endphp
                 <div class="bracket-round">
                     <div class="bracket-round-title">
                         @if($round == 2) Döntő
@@ -259,8 +268,40 @@
         </div>
     </div>
 
+    {{-- Bronz mérkőzés --}}
+    @if($bronzeKO)
+    <div style="margin-top:1.5rem; border-top:1px solid #2a2a4a; padding-top:1rem;">
+        <div style="font-size:0.8rem; font-weight:700; color:#cd7f32; text-transform:uppercase; margin-bottom:0.6rem;">🥉 3. helyért – Bronz mérkőzés</div>
+        <div style="display:flex; align-items:center; gap:0.8rem; flex-wrap:wrap;">
+            <div class="bracket-match" style="min-width:200px; flex:1; max-width:300px;">
+                @php
+                    $bHomeWin = $bronzeKO->is_played && $bronzeKO->winner_registration_id == $bronzeKO->home_registration_id;
+                    $bAwayWin = $bronzeKO->is_played && $bronzeKO->winner_registration_id == $bronzeKO->away_registration_id;
+                @endphp
+                <div class="bracket-team {{ $bHomeWin ? 'winner' : '' }} {{ !$bronzeKO->home_registration_id ? 'tbd' : '' }}">
+                    <span>{{ $bronzeKO->homeRegistration?->team_name ?? 'TBD' }}</span>
+                    @if($bronzeKO->is_played)<span class="bracket-score">{{ $bronzeKO->home_score }}</span>@endif
+                </div>
+                <div class="bracket-team {{ $bAwayWin ? 'winner' : '' }} {{ !$bronzeKO->away_registration_id ? 'tbd' : '' }}">
+                    <span>{{ $bronzeKO->awayRegistration?->team_name ?? 'TBD' }}</span>
+                    @if($bronzeKO->is_played)<span class="bracket-score">{{ $bronzeKO->away_score }}</span>@endif
+                </div>
+            </div>
+            @if($event->status === 'knockout_stage' && $bronzeKO->home_registration_id && $bronzeKO->away_registration_id && !$bronzeKO->is_played)
+            <form method="POST" action="{{ route('admin.knockout.result', [$event, $bronzeKO]) }}" class="score-form">
+                @csrf
+                <input type="number" name="home_score" min="0" max="10" placeholder="0" style="width:3rem;">
+                <span class="text-muted">-</span>
+                <input type="number" name="away_score" min="0" max="10" placeholder="0" style="width:3rem;">
+                <button type="submit" class="btn btn-success btn-sm">Rögzít</button>
+            </form>
+            @endif
+        </div>
+    </div>
+    @endif
+
     @if($event->status === 'finished')
-        @php $final = $event->knockoutMatches->where('round', 2)->first(); @endphp
+        @php $final = $allKO->where('round', 2)->where('is_bronze', false)->first(); @endphp
         @if($final && $final->winner)
         <div class="text-center mt-3">
             <div style="font-size:2rem; margin-bottom:0.5rem;">🏆</div>

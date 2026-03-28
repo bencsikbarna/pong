@@ -13,7 +13,9 @@ class EventController extends Controller
 {
     public function index()
     {
-        $events = Event::orderByDesc('event_date')->paginate(10);
+        $events = Event::withCount(['registrations as confirmed_registrations_count' => function ($q) {
+            $q->where('status', 'confirmed');
+        }])->orderByDesc('event_date')->paginate(10);
         return view('events.index', compact('events'));
     }
 
