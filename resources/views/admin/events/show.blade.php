@@ -277,7 +277,12 @@
     {{-- Bronz mérkőzés --}}
     @if($bronzeKO)
     <div style="margin-top:1.5rem; border-top:1px solid #2a2a4a; padding-top:1rem;">
-        <div style="font-size:0.8rem; font-weight:700; color:#cd7f32; text-transform:uppercase; margin-bottom:0.6rem;">🥉 3. helyért – Bronz mérkőzés@if($bronzeKO->table_number ?? false) &nbsp;<span style="font-weight:400; color:#f39c12; font-size:0.75rem;">🎯 {{ $bronzeKO->table_number }}. asztal</span>@endif</div>
+        <div style="font-size:0.8rem; font-weight:700; color:#cd7f32; text-transform:uppercase; margin-bottom:0.6rem;">
+            🥉 3. helyért – Bronz mérkőzés
+            @if($bronzeKO->table_number ?? false)
+                &nbsp;<span style="font-weight:400; color:#f39c12; font-size:0.75rem;">🎯 {{ $bronzeKO->table_number }}. asztal</span>
+            @endif
+        </div>
         <div style="display:flex; align-items:center; gap:0.8rem; flex-wrap:wrap;">
             <div class="bracket-match" style="min-width:200px; flex:1; max-width:300px;">
                 @php
