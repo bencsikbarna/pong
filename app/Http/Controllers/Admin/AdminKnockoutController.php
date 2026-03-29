@@ -23,13 +23,13 @@ class AdminKnockoutController extends Controller
             return back()->withErrors(['away_score' => 'Egyenes kiesésnél nem lehet döntetlen! Adj meg különböző eredményeket.']);
         }
 
-        $winnerId = $homeScore > $awayScore
-            ? $knockoutMatch->home_registration_id
-            : $knockoutMatch->away_registration_id;
+        $homeRegId = (int) $knockoutMatch->home_registration_id;
+        $awayRegId = (int) $knockoutMatch->away_registration_id;
+        $round     = (int) $knockoutMatch->round;
+        $isBronze  = (bool) $knockoutMatch->is_bronze;
 
-        $loserId = $winnerId === $knockoutMatch->home_registration_id
-            ? $knockoutMatch->away_registration_id
-            : $knockoutMatch->home_registration_id;
+        $winnerId = $homeScore > $awayScore ? $homeRegId : $awayRegId;
+        $loserId  = $winnerId === $homeRegId ? $awayRegId : $homeRegId;
 
         $knockoutMatch->update([
             'home_score'             => $homeScore,
@@ -38,18 +38,18 @@ class AdminKnockoutController extends Controller
             'is_played'              => true,
         ]);
 
-        // Továbbjutó beállítása a következő körben (döntőbe nem propagálunk bronze-ból)
-        if (!$knockoutMatch->is_bronze) {
+        // Továbbjutó beállítása a következő körben (bronz nem propagál tovább)
+        if (!$isBronze) {
             $this->propagateWinner($event, $knockoutMatch, $winnerId);
         }
 
         // Elődöntő vesztese → bronz mérkőzés
-        if ($knockoutMatch->round === 4 && !$knockoutMatch->is_bronze) {
+        if ($round === 4 && !$isBronze && $loserId) {
             $this->propagateLoserToBronze($event, $knockoutMatch, $loserId);
         }
 
-        // Döntő befejezve (bronz meccs NEM zárja le az eseményt)
-        if ($knockoutMatch->round === 2 && !$knockoutMatch->is_bronze) {
+        // Döntő befejezve (bronz NEM zárja le az eseményt)
+        if ($round === 2 && !$isBronze) {
             $event->update(['status' => 'finished']);
             $this->updateTeamStats($event);
             return redirect()->route('admin.events.show', $event)->with('success', 'Döntő eredménye rögzítve! Az esemény befejezett.');
@@ -60,10 +60,10 @@ class AdminKnockoutController extends Controller
 
     private function propagateWinner(Event $event, KnockoutMatch $match, int $winnerId): void
     {
-        $nextRound = $match->round / 2;
+        $nextRound = (int) $match->round / 2;
         if ($nextRound < 2) return;
 
-        $nextMatchNumber = (int) ceil($match->match_number / 2);
+        $nextMatchNumber = (int) ceil((int)$match->match_number / 2);
         $nextMatch = $event->knockoutMatches()
             ->where('round', $nextRound)
             ->where('match_number', $nextMatchNumber)
@@ -72,7 +72,7 @@ class AdminKnockoutController extends Controller
 
         if (!$nextMatch) return;
 
-        if ($match->match_number % 2 === 1) {
+        if ((int)$match->match_number % 2 === 1) {
             $nextMatch->update(['home_registration_id' => $winnerId]);
         } else {
             $nextMatch->update(['away_registration_id' => $winnerId]);
@@ -84,7 +84,7 @@ class AdminKnockoutController extends Controller
         $bronzeMatch = $event->knockoutMatches()->where('is_bronze', true)->first();
         if (!$bronzeMatch) return;
 
-        if ($semiMatch->match_number % 2 === 1) {
+        if ((int)$semiMatch->match_number % 2 === 1) {
             $bronzeMatch->update(['home_registration_id' => $loserId]);
         } else {
             $bronzeMatch->update(['away_registration_id' => $loserId]);

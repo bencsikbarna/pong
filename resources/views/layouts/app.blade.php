@@ -117,6 +117,16 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 1.5rem 1rem;
+            overflow-x: hidden;
+        }
+        /* prevent any element from breaking out of viewport */
+        body { overflow-x: hidden; }
+        .card, .hero-section { overflow-wrap: anywhere; word-break: break-word; }
+        @media (max-width: 640px) {
+            .score-form { gap: 0.25rem; }
+            .score-form input[type=number] { width: 2.8rem; }
+            .flex-between, .flex-gap { gap: 0.4rem; }
+            .page-header h1 { font-size: 1.3rem; }
         }
 
         /* ── ALERTS ── */

@@ -60,6 +60,16 @@
             .admin-main { margin-left: 0; }
             .admin-content { padding: 1rem; }
         }
+        body { overflow-x: hidden; }
+        .admin-main { overflow-x: hidden; }
+        .card { overflow-wrap: anywhere; word-break: break-word; }
+        @media (max-width: 640px) {
+            .score-form { gap: 0.2rem; }
+            .score-form input[type=number] { width: 2.6rem; font-size:0.85rem; }
+            .flex-between, .flex-gap { gap: 0.4rem; }
+            .page-header h1 { font-size: 1.2rem; }
+            .admin-content { padding: 0.75rem; }
+        }
 
         /* ── Shared styles ── */
         .alert { padding: 0.8rem 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.92rem; }

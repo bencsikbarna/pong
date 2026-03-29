@@ -10,7 +10,7 @@ class KnockoutMatch extends Model
     use HasFactory;
 
     protected $fillable = [
-        'event_id', 'round', 'match_number', 'is_bronze',
+        'event_id', 'round', 'match_number', 'table_number', 'is_bronze',
         'home_registration_id', 'away_registration_id',
         'home_score', 'away_score', 'winner_registration_id', 'is_played',
     ];

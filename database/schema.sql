@@ -174,6 +174,7 @@ CREATE TABLE IF NOT EXISTS `knockout_matches` (
     `away_score`             INT             NULL DEFAULT NULL,
     `winner_registration_id` BIGINT UNSIGNED NULL DEFAULT NULL,
     `is_played`              TINYINT(1)      NOT NULL DEFAULT 0,
+    `table_number`           INT             NOT NULL DEFAULT 1 COMMENT 'Asztal száma',
     `is_bronze`              TINYINT(1)      NOT NULL DEFAULT 0 COMMENT 'Bronz mérkőzés (3. helyért)',
     `created_at`             TIMESTAMP       NULL DEFAULT NULL,
     `updated_at`             TIMESTAMP       NULL DEFAULT NULL,

@@ -82,6 +82,10 @@ class AdminGroupController extends Controller
             'tables_count' => $tablesCount,
         ]);
 
+        // Asztalszámok globális újraszámozása: azonos forduló számú meccsek
+        // minden csoportban együtt kapnak egymást követő asztalszámokat
+        $this->reassignTableNumbers($event, $tablesCount);
+
         return redirect()->route('admin.events.show', $event)->with('success', 'Csoportok és fordulók sikeresen generálva!');
     }
 
@@ -216,94 +220,114 @@ class AdminGroupController extends Controller
 
     private function generateKnockout(Event $event, array $registrationIds): void
     {
-        // Töröljük a meglévő knockout meccseket
         $event->knockoutMatches()->delete();
 
         $count = count($registrationIds);
-        // Kerekítés felfelé a legközelebbi 2 hatványra
         $bracketSize = 1;
         while ($bracketSize < $count) {
             $bracketSize *= 2;
         }
 
-        // Shuffle a csapatok sorrendjét
         shuffle($registrationIds);
-
-        // Pad with null (bye) ha szükséges
         while (count($registrationIds) < $bracketSize) {
             $registrationIds[] = null;
         }
 
+        $tablesCount = max((int) $event->tables_count, 1);
+
         // Az első kör mérkőzéseinek generálása
         $matchNumber = 1;
         for ($i = 0; $i < $bracketSize; $i += 2) {
-            $home = $registrationIds[$i];
-            $away = $registrationIds[$i + 1];
-
-            $winner = null;
+            $home     = $registrationIds[$i];
+            $away     = $registrationIds[$i + 1];
+            $winner   = null;
             $isPlayed = false;
-
-            // Ha az egyik csapat bye (null), a másik automatikusan továbbjut
             if ($home === null || $away === null) {
-                $winner = $home ?? $away;
+                $winner   = $home ?? $away;
                 $isPlayed = true;
             }
-
             \App\Models\KnockoutMatch::create([
-                'event_id' => $event->id,
-                'round' => $bracketSize,
-                'match_number' => $matchNumber++,
-                'home_registration_id' => $home,
-                'away_registration_id' => $away,
+                'event_id'              => $event->id,
+                'round'                 => $bracketSize,
+                'match_number'          => $matchNumber,
+                'table_number'          => (($matchNumber - 1) % $tablesCount) + 1,
+                'home_registration_id'  => $home,
+                'away_registration_id'  => $away,
                 'winner_registration_id' => $winner,
-                'is_played' => $isPlayed,
+                'is_played'             => $isPlayed,
             ]);
+            $matchNumber++;
         }
 
-        // Generáljuk a közbülső köröket (elődöntőtől felfelé, döntő nélkül)
-        // A loop csak round=4-ig megy, a döntőt külön kezeljük
+        // Közbülső körök (bracketSize/2 → 4 között, döntő nélkül)
+        // Ha bracketSize=2 vagy 4, ez a ciklus nem fut, mert az első kör már a döntő/elődöntő
         $currentRound = $bracketSize;
         while ($currentRound > 4) {
-            $nextRound = $currentRound / 2;
-            $matchesInRound = $nextRound / 2;
+            $nextRound      = (int) ($currentRound / 2);
+            $matchesInRound = (int) ($nextRound / 2);
             for ($i = 1; $i <= $matchesInRound; $i++) {
                 \App\Models\KnockoutMatch::create([
-                    'event_id'              => $event->id,
-                    'round'                 => $nextRound,
-                    'match_number'          => $i,
-                    'home_registration_id'  => null,
-                    'away_registration_id'  => null,
-                    'is_played'             => false,
+                    'event_id'             => $event->id,
+                    'round'                => $nextRound,
+                    'match_number'         => $i,
+                    'table_number'         => (($i - 1) % $tablesCount) + 1,
+                    'home_registration_id' => null,
+                    'away_registration_id' => null,
+                    'is_played'            => false,
                 ]);
             }
             $currentRound = $nextRound;
         }
 
-        // Döntő
-        \App\Models\KnockoutMatch::create([
-            'event_id'              => $event->id,
-            'round'                 => 2,
-            'match_number'          => 1,
-            'home_registration_id'  => null,
-            'away_registration_id'  => null,
-            'is_played'             => false,
-        ]);
-
-        // Bronz mérkőzés (3. helyért) – csak ha van elődöntő
-        if ($bracketSize >= 4) {
+        // Döntő – csak akkor szükséges külön létrehozni, ha az első kör NEM a döntő
+        // (bracketSize=2 esetén az első kör IS a döntő, duplicate-et kerülünk el)
+        if ($bracketSize > 2) {
             \App\Models\KnockoutMatch::create([
-                'event_id'              => $event->id,
-                'round'                 => 2,
-                'match_number'          => 2,
-                'is_bronze'             => true,
-                'home_registration_id'  => null,
-                'away_registration_id'  => null,
-                'is_played'             => false,
+                'event_id'             => $event->id,
+                'round'                => 2,
+                'match_number'         => 1,
+                'table_number'         => 1,
+                'home_registration_id' => null,
+                'away_registration_id' => null,
+                'is_played'            => false,
             ]);
+
+            // Bronz mérkőzés (3. helyért) – csak ha van elődöntő (bracketSize >= 4)
+            if ($bracketSize >= 4) {
+                \App\Models\KnockoutMatch::create([
+                    'event_id'             => $event->id,
+                    'round'                => 2,
+                    'match_number'         => 2,
+                    'table_number'         => (1 % $tablesCount) + 1,
+                    'is_bronze'            => true,
+                    'home_registration_id' => null,
+                    'away_registration_id' => null,
+                    'is_played'            => false,
+                ]);
+            }
         }
 
-        // Ha van bye-ból nyertes, propagáljuk őket a következő körbe
         $this->propagateByeWinners($event);
+    }
+
+    private function reassignTableNumbers(Event $event, int $tablesCount): void
+    {
+        $groupIds = $event->groups()->pluck('id');
+        $roundsByNumber = Round::whereIn('group_id', $groupIds)
+            ->get()
+            ->groupBy('round_number');
+
+        foreach ($roundsByNumber as $rounds) {
+            $roundIds = $rounds->pluck('id');
+            $matches  = GameMatch::whereIn('round_id', $roundIds)
+                ->orderBy('round_id')
+                ->orderBy('id')
+                ->get();
+
+            foreach ($matches as $i => $match) {
+                $match->update(['table_number' => ($i % $tablesCount) + 1]);
+            }
+        }
     }
 
     private function propagateByeWinners(Event $event): void
