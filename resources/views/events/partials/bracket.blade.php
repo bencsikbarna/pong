@@ -51,7 +51,12 @@
     {{-- Bronz mérkőzés --}}
     @if($bronzeMatch)
     <div style="margin-top:1.5rem; border-top:1px solid #2a2a4a; padding-top:1rem;">
-        <div style="font-size:0.8rem; font-weight:700; color:#cd7f32; text-transform:uppercase; margin-bottom:0.6rem;">🥉 3. helyért – Bronz mérkőzés@if($bronzeMatch->table_number ?? false) &nbsp;<span style="font-weight:400; color:#555;">🎯 {{ $bronzeMatch->table_number }}. asztal</span>@endif</div>
+        <div style="font-size:0.8rem; font-weight:700; color:#cd7f32; text-transform:uppercase; margin-bottom:0.6rem;">
+            🥉 3. helyért – Bronz mérkőzés
+            @if($bronzeMatch->table_number ?? false)
+                &nbsp;<span style="font-weight:400; color:#555;">🎯 {{ $bronzeMatch->table_number }}. asztal</span>
+            @endif
+        </div>
         <div class="bracket-match" style="max-width:260px;">
             @php
                 $bHomeWin = $bronzeMatch->is_played && $bronzeMatch->winner_registration_id == $bronzeMatch->home_registration_id;
