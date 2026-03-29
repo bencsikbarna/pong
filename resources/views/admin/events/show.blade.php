@@ -108,7 +108,10 @@
 
 {{-- Csoportkör --}}
 @if(in_array($event->status, ['group_stage', 'knockout_stage', 'finished']) && $event->groups->isNotEmpty())
-<div class="card-title" style="font-size:1.3rem; color:#9b59b6; margin-bottom:1rem;">Csoportkör</div>
+<div class="flex-between" style="margin-bottom:1rem;">
+    <div class="card-title" style="font-size:1.3rem; color:#9b59b6; margin:0;">Csoportkör</div>
+    <a href="{{ route('admin.groups.print', $event) }}" target="_blank" class="btn btn-secondary btn-sm" title="PDF exportálás">🖨️ Fordulók exportálása</a>
+</div>
 
 @foreach($event->groups as $group)
 <div class="card">

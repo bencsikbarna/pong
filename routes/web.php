@@ -83,6 +83,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/esemenyek/{event}/csoportok/generalas', [AdminGroupController::class, 'generateForm'])->name('groups.generate.form');
         Route::post('/esemenyek/{event}/csoportok/generalas', [AdminGroupController::class, 'generate'])->name('groups.generate');
         Route::get('/esemenyek/{event}/csoportok/{group}', [AdminGroupController::class, 'show'])->name('groups.show');
+        Route::get('/esemenyek/{event}/fordulok/nyomtatas', [AdminGroupController::class, 'printRounds'])->name('groups.print');
         Route::post('/esemenyek/{event}/tovabbjutok', [AdminGroupController::class, 'advanceTeams'])->name('groups.advance');
 
         // Meccs eredmények

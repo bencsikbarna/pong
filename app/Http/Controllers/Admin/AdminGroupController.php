@@ -179,6 +179,12 @@ class AdminGroupController extends Controller
         return view('admin.groups.show', compact('event', 'group'));
     }
 
+    public function printRounds(Event $event)
+    {
+        $event->load(['groups.rounds.matches.homeRegistration', 'groups.rounds.matches.awayRegistration']);
+        return view('admin.groups.print-rounds', compact('event'));
+    }
+
     public function advanceTeams(Request $request, Event $event)
     {
         $request->validate([
