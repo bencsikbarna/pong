@@ -24,12 +24,14 @@
 
         <div class="form-group">
             <label>Asztalok száma (hány meccs futhat egyszerre) *</label>
-            <input type="number" name="tables_count" value="{{ old('tables_count', 2) }}" required min="1" max="20">
-            <div class="text-muted mt-1" style="font-size:0.82rem;">
+            <input type="number" name="tables_count" id="tables_count" value="{{ old('tables_count', 2) }}" required min="1" max="20">
+            <div class="text-muted mt-1" style="font-size:0.82rem;" id="tables-hint">
                 Adott fordulóban maximum ennyi mérkőzés zajlik egyszerre.
             </div>
             @error('tables_count') <div class="field-error">{{ $message }}</div> @enderror
         </div>
+
+        <div id="tables-warning" style="display:none;" class="alert alert-warning" style="font-size:0.88rem;"></div>
 
         <div class="alert alert-warning" style="font-size:0.88rem;">
             <strong>Figyelem:</strong> A generálás véletlenszerűen osztja be a csapatokat. Ha már vannak csoportok, azok törlődnek.
@@ -41,4 +43,27 @@
         </div>
     </form>
 </div>
+
+<script>
+const teamCount = {{ $teamCount }};
+
+function updateHint() {
+    const groupSize = parseInt(document.querySelector('[name=group_size]').value) || 0;
+    const tables = parseInt(document.getElementById('tables_count').value) || 0;
+    const numGroups = groupSize > 0 ? Math.ceil(teamCount / groupSize) : 0;
+    const warning = document.getElementById('tables-warning');
+
+    if (numGroups > 0 && tables > 0 && tables % numGroups !== 0) {
+        const perGroup = Math.floor(tables / numGroups);
+        warning.style.display = 'block';
+        warning.innerHTML = '<strong>Figyelem:</strong> ' + tables + ' asztal nem osztható egyenlően ' + numGroups + ' csoportra. Csoportonként ' + perGroup + ' asztal jut, ' + (tables % numGroups) + ' asztal kihasználatlan lesz. Ajánlott asztalszám: <strong>' + (perGroup * numGroups) + '</strong> vagy <strong>' + ((perGroup + 1) * numGroups) + '</strong>.';
+    } else {
+        warning.style.display = 'none';
+    }
+}
+
+document.querySelector('[name=group_size]').addEventListener('input', updateHint);
+document.getElementById('tables_count').addEventListener('input', updateHint);
+updateHint();
+</script>
 @endsection
