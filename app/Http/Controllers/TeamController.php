@@ -12,6 +12,14 @@ class TeamController extends Controller
     public function dashboard()
     {
         $team = Auth::guard('team')->user();
+        $team->load('registrations.groupTeam');
+        $groupTeams = $team->registrations->map->groupTeam->filter();
+        $team->dyn_wins          = $groupTeams->sum('wins');
+        $team->dyn_losses        = $groupTeams->sum('losses');
+        $team->dyn_draws         = $groupTeams->sum('draws');
+        $team->dyn_cups_scored   = $groupTeams->sum('cups_scored');
+        $team->dyn_cups_conceded = $groupTeams->sum('cups_conceded');
+        $team->dyn_cup_diff      = $team->dyn_cups_scored - $team->dyn_cups_conceded;
         $registrations = $team->registrations()->with('event')->latest()->get();
         return view('team.dashboard', compact('team', 'registrations'));
     }

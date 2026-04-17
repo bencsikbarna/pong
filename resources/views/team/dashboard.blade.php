@@ -9,28 +9,28 @@
 
 <div class="grid-3 mb-2">
     <div class="card text-center">
-        <div style="font-size:2rem; font-weight:800; color:#2ecc71;">{{ $team->total_wins }}</div>
+        <div style="font-size:2rem; font-weight:800; color:#2ecc71;">{{ $team->dyn_wins }}</div>
         <div class="text-muted" style="font-size:0.9rem;">Győzelmek</div>
     </div>
     <div class="card text-center">
-        <div style="font-size:2rem; font-weight:800; color:#e74c3c;">{{ $team->total_losses }}</div>
+        <div style="font-size:2rem; font-weight:800; color:#e74c3c;">{{ $team->dyn_losses }}</div>
         <div class="text-muted" style="font-size:0.9rem;">Vereségek</div>
     </div>
     <div class="card text-center">
-        <div style="font-size:2rem; font-weight:800; color:#95a5a6;">{{ $team->total_draws }}</div>
+        <div style="font-size:2rem; font-weight:800; color:#95a5a6;">{{ $team->dyn_draws }}</div>
         <div class="text-muted" style="font-size:0.9rem;">Döntetlenek</div>
     </div>
     <div class="card text-center">
-        <div style="font-size:2rem; font-weight:800; color:#f39c12;">{{ $team->total_cups_scored }}</div>
+        <div style="font-size:2rem; font-weight:800; color:#f39c12;">{{ $team->dyn_cups_scored }}</div>
         <div class="text-muted" style="font-size:0.9rem;">Poharak (szerzett)</div>
     </div>
     <div class="card text-center">
-        <div style="font-size:2rem; font-weight:800; color:#3498db;">{{ $team->total_cups_conceded }}</div>
+        <div style="font-size:2rem; font-weight:800; color:#3498db;">{{ $team->dyn_cups_conceded }}</div>
         <div class="text-muted" style="font-size:0.9rem;">Poharak (kapott)</div>
     </div>
     <div class="card text-center">
-        <div style="font-size:2rem; font-weight:800; color:{{ $team->total_cup_diff >= 0 ? '#2ecc71' : '#e74c3c' }}">
-            {{ $team->total_cup_diff > 0 ? '+' : '' }}{{ $team->total_cup_diff }}
+        <div style="font-size:2rem; font-weight:800; color:{{ $team->dyn_cup_diff >= 0 ? '#2ecc71' : '#e74c3c' }}">
+            {{ $team->dyn_cup_diff > 0 ? '+' : '' }}{{ $team->dyn_cup_diff }}
         </div>
         <div class="text-muted" style="font-size:0.9rem;">Pohárkülönbség</div>
     </div>
