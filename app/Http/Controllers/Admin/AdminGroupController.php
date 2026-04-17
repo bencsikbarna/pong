@@ -57,6 +57,10 @@ class AdminGroupController extends Controller
         // Csoportokra osztás
         $chunks = $registrations->chunk($groupSize);
         $groupLetters = range('A', 'Z');
+        $numGroups = $chunks->count();
+
+        // Csoportonként ennyi asztal jut (az összes asztal globálisan oszlik el)
+        $tablesPerGroup = max(1, intdiv($tablesCount, $numGroups));
 
         foreach ($chunks as $index => $chunk) {
             $group = Group::create([
@@ -74,7 +78,7 @@ class AdminGroupController extends Controller
 
             // Fordulók generálása round-robin módszerrel
             $groupTeams = $group->groupTeams()->get();
-            $this->generateRounds($group, $groupTeams, $tablesCount);
+            $this->generateRounds($group, $groupTeams, $tablesPerGroup);
         }
 
         $event->update([
