@@ -290,6 +290,7 @@
     <ul class="nav-links">
         <li><a href="{{ route('events.index') }}">Események</a></li>
         <li><a href="{{ route('teams.stats') }}">Csapatok</a></li>
+        <li><a href="{{ route('rules') }}">Szabályzat</a></li>
         @auth('team')
             <li><span class="nav-user">🏆 {{ Auth::guard('team')->user()->name }}</span></li>
             <li><a href="{{ route('team.dashboard') }}">Irányítópult</a></li>

@@ -26,6 +26,9 @@ Route::post('/esemenyek/{event}/visszalep', [EventController::class, 'cancelRegi
 // Csapat statisztikák (publikus)
 Route::get('/csapatok', [TeamController::class, 'stats'])->name('teams.stats');
 
+// Versenyszabályzat (publikus)
+Route::get('/szabalyzat', fn() => view('szabalyzat'))->name('rules');
+
 // ============================================================
 // Csapat Auth
 // ============================================================
